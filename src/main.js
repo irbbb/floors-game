@@ -29,12 +29,17 @@ function spawnEnemies(spawnTiles, occupied, floor) {
   return enemies;
 }
 
-function spawnItems(spawnTiles, occupied) {
+function spawnItems(spawnTiles, occupied, floor) {
   const items = [];
-  for (let i = 0; i < 2; i++) {
+  // Always one potion (index 0)
+  const potionPos = randomFloorTile(spawnTiles, [...occupied, ...items]);
+  if (potionPos) items.push(new Item(potionPos.x, potionPos.y, 0));
+  // Gear: 1 item on floors 1-2, 2 items on floors 3+
+  const gearCount = floor >= 3 ? 2 : 1;
+  for (let i = 0; i < gearCount; i++) {
     const pos = randomFloorTile(spawnTiles, [...occupied, ...items]);
     if (!pos) break;
-    items.push(new Item(pos.x, pos.y));
+    items.push(new Item(pos.x, pos.y, 1 + Math.floor(Math.random() * 5)));
   }
   return items;
 }
@@ -82,7 +87,7 @@ function buildFloor(floor, player) {
   player.x = startX;
   player.y = startY;
   const enemies = spawnEnemies(spawnTiles, [player], floor);
-  const items    = spawnItems(spawnTiles, [player, ...enemies]);
+  const items    = spawnItems(spawnTiles, [player, ...enemies], floor);
   return { map: { tiles, exitPos, explored, visible: null }, enemies, items };
 }
 
@@ -119,6 +124,20 @@ function nextFloor() {
   state.items   = items;
   state.log     = `Floor ${state.floor} — deeper dangers await…`;
   updateFOV();
+}
+
+// --- Equipment ---
+
+function equipItem(player, item) {
+  const current = player.gear[item.slot];
+  if (current) {
+    player.atk -= current.atkBonus;
+    player.def -= current.defBonus;
+  }
+  player.atk += item.atkBonus;
+  player.def += item.defBonus;
+  player.gear[item.slot] = item;
+  return current;
 }
 
 // --- Leveling ---
@@ -176,6 +195,11 @@ function tryMove(dx, dy) {
         const healed = Math.min(item.value, player.maxHp - player.hp);
         player.hp += healed;
         state.log = `You drink a ${item.name} and restore ${healed} HP.`;
+      } else if (item.effect === 'equip') {
+        const old = equipItem(player, item);
+        state.log = old
+          ? `You equip the ${item.name}, replacing the ${old.name}.`
+          : `You equip the ${item.name}.`;
       }
     } else if (map.tiles[ny][nx] === TILE.EXIT) {
       nextFloor();

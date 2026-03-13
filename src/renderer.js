@@ -1,11 +1,10 @@
-import { TILE_SIZE, TILE, COLOR, MAX_FLOORS, LEVEL_UP_CHOICES } from './constants.js';
+import { TILE_SIZE, TILE, COLOR, MAX_FLOORS, LEVEL_UP_CHOICES, HUD_H } from './constants.js';
 
 export function render(canvas, ctx, state) {
   const { map, player, enemies, items, log, status, floor, turns, kills } = state;
   const rows = map.tiles.length;
   const cols = map.tiles[0].length;
 
-  const HUD_H = 70;
   canvas.width  = cols * TILE_SIZE;
   canvas.height = rows * TILE_SIZE + HUD_H;
 
@@ -47,14 +46,29 @@ export function render(canvas, ctx, state) {
   // --- Items ---
   for (const item of items) {
     if (!map.visible?.[item.y][item.x]) continue;
-    // Draw a small plus / cross symbol
     ctx.fillStyle = item.color;
     const cx = item.x * TILE_SIZE + TILE_SIZE / 2;
     const cy = item.y * TILE_SIZE + TILE_SIZE / 2;
-    const arm = TILE_SIZE * 0.28;
-    const thick = TILE_SIZE * 0.12;
-    ctx.fillRect(cx - thick, cy - arm, thick * 2, arm * 2); // vertical bar
-    ctx.fillRect(cx - arm,  cy - thick, arm * 2, thick * 2); // horizontal bar
+    if (item.symbol === '+') {
+      const arm = TILE_SIZE * 0.28, thick = TILE_SIZE * 0.12;
+      ctx.fillRect(cx - thick, cy - arm,   thick * 2, arm * 2);
+      ctx.fillRect(cx - arm,   cy - thick, arm * 2,   thick * 2);
+    } else {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `bold ${Math.round(TILE_SIZE * 0.7)}px monospace`;
+      ctx.fillText(item.symbol, cx, cy - 2);
+      // Bonus label below symbol
+      const bonusParts = [];
+      if (item.atkBonus) bonusParts.push(`+${item.atkBonus}A`);
+      if (item.defBonus) bonusParts.push(`+${item.defBonus}D`);
+      if (bonusParts.length) {
+        ctx.font = `${Math.round(TILE_SIZE * 0.4)}px monospace`;
+        ctx.fillText(bonusParts.join(' '), cx, cy + Math.round(TILE_SIZE * 0.38));
+      }
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+    }
   }
 
   // --- Enemies ---
@@ -120,11 +134,26 @@ export function render(canvas, ctx, state) {
   ctx.font = '11px monospace';
   ctx.fillText(log ?? '', 10, hudY + 57);
 
+  // Gear row
+  ctx.font = '11px monospace';
+  ctx.fillStyle = COLOR.HUD_EQUIP_LABEL;
+  ctx.fillText('WPN:', 10, hudY + 74);
+  ctx.fillStyle = COLOR.HUD_EQUIP_ITEM;
+  ctx.fillText(player.gear.weapon?.name ?? '—', 42, hudY + 74);
+  ctx.fillStyle = COLOR.HUD_EQUIP_LABEL;
+  ctx.fillText('ARM:', 180, hudY + 74);
+  ctx.fillStyle = COLOR.HUD_EQUIP_ITEM;
+  ctx.fillText(player.gear.armor?.name ?? '—', 212, hudY + 74);
+  ctx.fillStyle = COLOR.HUD_EQUIP_LABEL;
+  ctx.fillText('RNG:', 350, hudY + 74);
+  ctx.fillStyle = COLOR.HUD_EQUIP_ITEM;
+  ctx.fillText(player.gear.ring?.name ?? '—', 382, hudY + 74);
+
   // Controls (right side)
   ctx.fillStyle = '#555';
   ctx.font = '11px monospace';
   ctx.fillText('Move: arrow keys / WASD   R: restart', canvas.width - 265, hudY + 19);
-  ctx.fillText('+  = health potion', canvas.width - 160, hudY + 38);
+  ctx.fillText('+  potion   /  sword   ]  armor   o  ring', canvas.width - 320, hudY + 38);
 
   // --- Overlay ---
   if (status === 'levelup') {

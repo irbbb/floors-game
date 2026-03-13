@@ -5,19 +5,21 @@ export const MAP_H = 30;
 export const TILE = { WALL: 0, FLOOR: 1, EXIT: 2 };
 
 export const COLOR = {
-  WALL:       '#1a1a2e',
-  FLOOR:      '#2d2d3d',
-  EXIT:       '#f0c040',
-  PLAYER:     '#e8e8ff',
-  ENEMY:      '#e05050',
-  ITEM:       '#60c080',
-  HUD_BG:     '#0d0d1a',
-  HUD_TEXT:   '#c8c8d8',
-  HUD_HP:     '#e05050',
-  HUD_HP_BG:  '#3a1a1a',
-  OVERLAY_BG: 'rgba(0,0,0,0.7)',
-  WIN:        '#80e080',
-  LOSE:       '#e08080',
+  WALL:            '#1a1a2e',
+  FLOOR:           '#2d2d3d',
+  EXIT:            '#f0c040',
+  PLAYER:          '#e8e8ff',
+  ENEMY:           '#e05050',
+  ITEM:            '#60c080',
+  HUD_BG:          '#0d0d1a',
+  HUD_TEXT:        '#c8c8d8',
+  HUD_HP:          '#e05050',
+  HUD_HP_BG:       '#3a1a1a',
+  OVERLAY_BG:      'rgba(0,0,0,0.7)',
+  WIN:             '#80e080',
+  LOSE:            '#e08080',
+  HUD_EQUIP_LABEL: '#888899',
+  HUD_EQUIP_ITEM:  '#d8d8f0',
 };
 
 export const PLAYER_STATS = { hp: 20, maxHp: 20, atk: 5, def: 2 };
@@ -37,7 +39,13 @@ export const LEVEL_UP_CHOICES = [
 export const BASE_ENEMY_COUNT = 6;
 export const MAX_FLOORS = 5;
 export const FOV_RADIUS = 6;
+export const HUD_H = 90;
 
 export const ITEM_TYPES = [
-  { name: 'Health Potion', color: '#60c080', effect: 'heal', value: 10 },
+  { name: 'Health Potion', color: '#60c080', effect: 'heal',  value: 10, slot: null,     symbol: '+', atkBonus: 0, defBonus: 0 },
+  { name: 'Short Sword',   color: '#c0c0e0', effect: 'equip', value: 0,  slot: 'weapon', symbol: '/', atkBonus: 2, defBonus: 0 },
+  { name: 'Long Sword',    color: '#e0e0ff', effect: 'equip', value: 0,  slot: 'weapon', symbol: '/', atkBonus: 4, defBonus: 0 },
+  { name: 'Leather Armor', color: '#c09040', effect: 'equip', value: 0,  slot: 'armor',  symbol: ']', atkBonus: 0, defBonus: 1 },
+  { name: 'Chain Mail',    color: '#a0b8c0', effect: 'equip', value: 0,  slot: 'armor',  symbol: ']', atkBonus: 0, defBonus: 3 },
+  { name: 'Ring of Power', color: '#e0a020', effect: 'equip', value: 0,  slot: 'ring',   symbol: 'o', atkBonus: 1, defBonus: 1 },
 ];

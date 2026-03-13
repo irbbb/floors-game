@@ -8,6 +8,7 @@ export class Player {
     this.level    = 1;
     this.xp       = 0;
     this.xpToNext = 10;
+    this.gear     = { weapon: null, armor: null, ring: null };
   }
 
   get alive() { return this.hp > 0; }
@@ -52,10 +53,14 @@ export class Item {
     const type = ITEM_TYPES[typeIndex ?? Math.floor(Math.random() * ITEM_TYPES.length)];
     this.x      = x;
     this.y      = y;
-    this.name   = type.name;
-    this.color  = type.color;
-    this.effect = type.effect;
-    this.value  = type.value;
+    this.name     = type.name;
+    this.color    = type.color;
+    this.effect   = type.effect;
+    this.value    = type.value;
+    this.slot     = type.slot;
+    this.symbol   = type.symbol;
+    this.atkBonus = type.atkBonus ?? 0;
+    this.defBonus = type.defBonus ?? 0;
   }
 }
 
