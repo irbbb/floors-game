@@ -2,7 +2,7 @@ import { generateDungeon, randomFloorTile } from './dungeon.js';
 import { Player, Enemy, Item } from './entities.js';
 import { resolveAttack } from './combat.js';
 import { render } from './renderer.js';
-import { BASE_ENEMY_COUNT, MAX_FLOORS, ENEMY_TYPES, TILE, FOV_RADIUS, LEVEL_UP_CHOICES } from './constants.js';
+import { BASE_ENEMY_COUNT, MAX_FLOORS, ENEMY_TYPES, TILE, FOV_RADIUS, CLASSES } from './constants.js';
 
 const canvas = document.getElementById('canvas');
 const ctx    = canvas.getContext('2d');
@@ -101,14 +101,23 @@ function init() {
     player,
     enemies,
     items,
-    log:    'Find the golden exit and escape!',
-    status: 'playing',
+    log:           'Choose your class to begin!',
+    status:        'classselect',
     floor,
-    turns:  0,
-    kills:  0,
+    turns:         0,
+    kills:         0,
+    playerClass:   null,
+    levelUpChoices: [],
   };
 
   updateFOV();
+  render(canvas, ctx, state);
+}
+
+function chooseClass(index) {
+  state.playerClass = index;
+  state.status = 'playing';
+  state.log = `You are a ${CLASSES[index].name}. Find the golden exit!`;
   render(canvas, ctx, state);
 }
 
@@ -143,6 +152,12 @@ function equipItem(player, item) {
 // --- Leveling ---
 
 function levelUp() {
+  const pool = [...CLASSES[state.playerClass].talents];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  state.levelUpChoices = pool.slice(0, 3);
   state.status = 'levelup';
 }
 
@@ -151,8 +166,9 @@ function applyLevelUp(index) {
   player.xp -= player.xpToNext;
   player.level += 1;
   player.xpToNext = player.level * 10;
-  LEVEL_UP_CHOICES[index].apply(player);
-  state.log = `Level ${player.level}! You chose ${LEVEL_UP_CHOICES[index].label}.`;
+  const talent = state.levelUpChoices[index];
+  talent.apply(player);
+  state.log = `Level ${player.level}! You chose ${talent.label}.`;
   state.status = 'playing';
   updateFOV();
   render(canvas, ctx, state);
@@ -180,6 +196,7 @@ function tryMove(dx, dy) {
       state.kills += 1;
       state.log += ` The ${target.name} dies.`;
       player.xp += target.xp;
+      if (player.vampireHeal > 0) player.hp = Math.min(player.hp + player.vampireHeal, player.maxHp);
       if (player.xp >= player.xpToNext) levelUp();
     }
   } else {
@@ -213,6 +230,7 @@ function tryMove(dx, dy) {
   // Enemies act
   enemyTurn();
 
+  if (player.regen > 0) player.hp = Math.min(player.hp + player.regen, player.maxHp);
   if (!player.alive) state.status = 'lose';
   updateFOV();
   render(canvas, ctx, state);
@@ -245,6 +263,11 @@ const KEY_MAP = {
 
 window.addEventListener('keydown', e => {
   if (e.key === 'r' || e.key === 'R') { init(); return; }
+  if (state.status === 'classselect') {
+    const idx = { '1': 0, '2': 1, '3': 2 }[e.key];
+    if (idx !== undefined) chooseClass(idx);
+    return;
+  }
   if (state.status === 'levelup') {
     const idx = { '1': 0, '2': 1, '3': 2 }[e.key];
     if (idx !== undefined) applyLevelUp(idx);

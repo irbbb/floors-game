@@ -8,7 +8,9 @@ export class Player {
     this.level    = 1;
     this.xp       = 0;
     this.xpToNext = 10;
-    this.gear     = { weapon: null, armor: null, ring: null };
+    this.gear        = { weapon: null, armor: null, ring: null };
+    this.regen       = 0;
+    this.vampireHeal = 0;
   }
 
   get alive() { return this.hp > 0; }

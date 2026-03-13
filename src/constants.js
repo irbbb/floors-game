@@ -30,10 +30,40 @@ export const ENEMY_TYPES = [
   { name: 'Orc',    color: '#804040', hp: 14, atk: 6, def: 2, xp: 8 },
 ];
 
-export const LEVEL_UP_CHOICES = [
-  { label: '+3 ATK',    apply: p => { p.atk += 3; } },
-  { label: '+2 DEF',    apply: p => { p.def += 2; } },
-  { label: '+8 Max HP', apply: p => { p.maxHp += 8; p.hp = Math.min(p.hp + 8, p.maxHp); } },
+export const CLASSES = [
+  {
+    name: 'Warrior', color: '#e08040',
+    desc: 'Sturdy melee fighter. Talents focus on HP and DEF.',
+    talents: [
+      { label: 'Toughness',  desc: '+5 Max HP, restore 5 HP',     apply: p => { p.maxHp += 5; p.hp = Math.min(p.hp + 5, p.maxHp); } },
+      { label: 'Iron Skin',  desc: '+3 DEF',                       apply: p => { p.def += 3; } },
+      { label: 'Battle Cry', desc: '+3 ATK, +3 Max HP',            apply: p => { p.atk += 3; p.maxHp += 3; } },
+      { label: 'Endurance',  desc: '+8 Max HP, restore 8 HP',      apply: p => { p.maxHp += 8; p.hp = Math.min(p.hp + 8, p.maxHp); } },
+      { label: 'Fortitude',  desc: '+2 DEF, regenerate 1 HP/turn', apply: p => { p.def += 2; p.regen += 1; } },
+    ],
+  },
+  {
+    name: 'Rogue', color: '#40c0a0',
+    desc: 'Swift killer. Talents focus on ATK and on-kill rewards.',
+    talents: [
+      { label: 'Precision',  desc: '+5 ATK',                         apply: p => { p.atk += 5; } },
+      { label: 'Nimble',     desc: '+3 ATK, +1 DEF, +3 Max HP',      apply: p => { p.atk += 3; p.def += 1; p.maxHp += 3; } },
+      { label: 'Bloodlust',  desc: 'Heal 2 HP on each kill',         apply: p => { p.vampireHeal += 2; } },
+      { label: 'Blitz',      desc: '+4 ATK, +4 Max HP',              apply: p => { p.atk += 4; p.maxHp += 4; } },
+      { label: 'Shadowstep', desc: '+3 ATK, regenerate 1 HP/turn',   apply: p => { p.atk += 3; p.regen += 1; } },
+    ],
+  },
+  {
+    name: 'Mage', color: '#8080e0',
+    desc: 'Arcane scholar. Balanced ATK/DEF with passive bonuses.',
+    talents: [
+      { label: 'Arcane Surge',  desc: '+4 ATK, +3 Max HP',             apply: p => { p.atk += 4; p.maxHp += 3; } },
+      { label: 'Arcane Ward',   desc: '+4 DEF',                        apply: p => { p.def += 4; } },
+      { label: 'Mana Shield',   desc: '+2 DEF, +3 ATK',                apply: p => { p.def += 2; p.atk += 3; } },
+      { label: 'Resonance',     desc: '+2 ATK, regenerate 1 HP/turn',  apply: p => { p.atk += 2; p.regen += 1; } },
+      { label: 'Life Tap',      desc: 'Heal 3 HP on each kill',        apply: p => { p.vampireHeal += 3; } },
+    ],
+  },
 ];
 
 export const BASE_ENEMY_COUNT = 6;

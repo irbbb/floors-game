@@ -1,7 +1,7 @@
-import { TILE_SIZE, TILE, COLOR, MAX_FLOORS, LEVEL_UP_CHOICES, HUD_H } from './constants.js';
+import { TILE_SIZE, TILE, COLOR, MAX_FLOORS, CLASSES, HUD_H } from './constants.js';
 
 export function render(canvas, ctx, state) {
-  const { map, player, enemies, items, log, status, floor, turns, kills } = state;
+  const { map, player, enemies, items, log, status, floor, turns, kills, playerClass, levelUpChoices } = state;
   const rows = map.tiles.length;
   const cols = map.tiles[0].length;
 
@@ -128,6 +128,10 @@ export function render(canvas, ctx, state) {
   ctx.fillText(`Turns: ${turns}`, 210, hudY + 38);
   ctx.fillText(`ATK: ${player.atk}`, 310, hudY + 38);
   ctx.fillText(`DEF: ${player.def}`, 390, hudY + 38);
+  if (playerClass !== null) {
+    ctx.fillStyle = CLASSES[playerClass].color;
+    ctx.fillText(CLASSES[playerClass].name, 470, hudY + 38);
+  }
 
   // Log line
   ctx.fillStyle = '#a0a0b8';
@@ -156,7 +160,24 @@ export function render(canvas, ctx, state) {
   ctx.fillText('+  potion   /  sword   ]  armor   o  ring', canvas.width - 320, hudY + 38);
 
   // --- Overlay ---
-  if (status === 'levelup') {
+  if (status === 'classselect') {
+    ctx.fillStyle = COLOR.OVERLAY_BG;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.textAlign = 'center';
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    ctx.font = 'bold 28px monospace';
+    ctx.fillStyle = '#f0e080';
+    ctx.fillText('CHOOSE YOUR CLASS', cx, cy - 90);
+    CLASSES.forEach((cls, i) => {
+      ctx.fillStyle = cls.color;
+      ctx.font = 'bold 20px monospace';
+      ctx.fillText(`[${i + 1}]  ${cls.name}`, cx, cy - 30 + i * 52);
+      ctx.font = '13px monospace';
+      ctx.fillStyle = COLOR.HUD_TEXT;
+      ctx.fillText(cls.desc, cx, cy - 10 + i * 52);
+    });
+    ctx.textAlign = 'left';
+  } else if (status === 'levelup') {
     ctx.fillStyle = COLOR.OVERLAY_BG;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.textAlign = 'center';
@@ -164,11 +185,14 @@ export function render(canvas, ctx, state) {
     const cy = canvas.height / 2;
     ctx.font = 'bold 32px monospace';
     ctx.fillStyle = '#f0e080';
-    ctx.fillText(`LEVEL UP!  →  Lv ${player.level + 1}`, cx, cy - 50);
-    ctx.font = '18px monospace';
-    ctx.fillStyle = COLOR.HUD_TEXT;
-    LEVEL_UP_CHOICES.forEach((c, i) => {
-      ctx.fillText(`[${i + 1}]  ${c.label}`, cx, cy + i * 34);
+    ctx.fillText(`LEVEL UP!  →  Lv ${player.level + 1}`, cx, cy - 60);
+    levelUpChoices.forEach((t, i) => {
+      ctx.fillStyle = CLASSES[playerClass].color;
+      ctx.font = 'bold 17px monospace';
+      ctx.fillText(`[${i + 1}]  ${t.label}`, cx, cy - 10 + i * 46);
+      ctx.fillStyle = COLOR.HUD_TEXT;
+      ctx.font = '13px monospace';
+      ctx.fillText(t.desc, cx, cy + 10 + i * 46);
     });
     ctx.textAlign = 'left';
   } else if (status === 'win' || status === 'lose') {
